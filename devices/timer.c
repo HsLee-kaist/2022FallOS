@@ -93,8 +93,7 @@ timer_sleep (int64_t ticks) {
 	int64_t start = timer_ticks ();
 
 	ASSERT (intr_get_level () == INTR_ON);
-	while (timer_elapsed (start) < ticks)
-		thread_yield ();
+	thread_sleep(start + ticks);
 }
 
 /* Suspends execution for approximately MS milliseconds. */
@@ -126,6 +125,35 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
+	
+	if (thread_mlfqs) {
+
+	 	// increase recent_cpu for running thread
+		inc_recent_cpu(); // this should be implemented in thread.c
+ 	
+	 	// calculate load_avg, recent_cpu of all threads for every 1sec 
+		int64_t now = timer_ticks();
+
+		if (now % TIMER_FREQ == 0) {
+			cal_load_avg(); // where we have to implement this function??
+			recal_recent_cpu(); // should be implemented in thread.c
+			recal_priority(); // should be implemented in thread.c
+		}
+	
+		// calculate priority of all threads for 4th tick
+		if (now % 4 == 0) {
+			recal_priority();
+		}
+	}
+
+	int64_t wake_tick = get_minimum_tick();
+	// thread_wake(ticks);
+	
+	/* Need to check every sleeping threads that they need to wake up */
+	if (wake_tick <= ticks){
+		thread_wake(ticks);
+	// thread_wake(get_minimum_tick());	
+	}
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

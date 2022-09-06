@@ -90,10 +90,21 @@ struct thread {
 	tid_t tid;                          /* Thread identifier. */
 	enum thread_status status;          /* Thread state. */
 	char name[16];                      /* Name (for debugging purposes). */
-	int priority;                       /* Priority. */
+	int priority;          
+	int64_t local_tick;             /* Priority. */
 
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
+
+		/* For priority donation */
+	int init_priority;
+    struct lock *wait_on_lock;
+    struct list donations;
+    struct list_elem donation_elem;
+
+		/* For 4.4BSD implementation */
+	int nice;	// -20 ~ 20
+	int recent_cpu;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
@@ -136,11 +147,32 @@ void thread_yield (void);
 int thread_get_priority (void);
 void thread_set_priority (int);
 
+//project1-priority donation functions
+void donate_priority(void);
+void remove_with_lock(struct lock *lock);
+void refresh_priority(void);
+
 int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 void do_iret (struct intr_frame *tf);
+//project 1 - clock
+void thread_sleep (int64_t ticks);
+void thread_wake (int64_t ticks);
+void update_minimum_tick (struct thread *th, int64_t ticks);
+int64_t get_minimum_tick (void);
+bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
+bool cmp_don_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
+void test_max_priority (void);
+
+// project 1-For 4.4BSD implementation
+void inc_recent_cpu (void);
+int cal_recent_cpu (int recent_cpu, int nice);
+int cal_priority (int recent_cpu, int nice);
+void recal_recent_cpu (void);
+void recal_priority (void);
+
 
 #endif /* threads/thread.h */
