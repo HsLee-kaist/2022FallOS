@@ -324,7 +324,7 @@ thread_sleep(int64_t ticks) {
 	if(curr != idle_thread){
 		curr->local_tick = ticks;
 
-		update_minimum_tick(curr, ticks);
+		update_minimum_tick(curr);
 		list_push_back (&sleep_list, &curr->elem);
 		thread_block();
 	}
@@ -343,13 +343,13 @@ thread_wake(int64_t ticks){
 				thread_unblock(th);
 			}
 			else {
-				update_minimum_tick(th, ticks);
+				update_minimum_tick(th);
 				sleep_thread = list_next (sleep_thread);
 			}
 		}
 }
 
-void update_minimum_tick(struct thread *th, int64_t ticks){
+void update_minimum_tick(struct thread *th){
 	int64_t cur_tick = th->local_tick;
 	if (cur_tick < minimum_tick){
 		minimum_tick = cur_tick;

@@ -118,6 +118,7 @@ struct thread {
 	/* Owned by thread.c. */
 	struct intr_frame tf;               /* Information for switching */
 	unsigned magic;                     /* Detects stack overflow. */
+
 };
 
 /* If false (default), use round-robin scheduler.
@@ -161,7 +162,7 @@ void do_iret (struct intr_frame *tf);
 //project 1 - clock
 void thread_sleep (int64_t ticks);
 void thread_wake (int64_t ticks);
-void update_minimum_tick (struct thread *th, int64_t ticks);
+void update_minimum_tick (struct thread *th);
 int64_t get_minimum_tick (void);
 bool cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
 bool cmp_don_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
@@ -173,6 +174,7 @@ int cal_recent_cpu (int recent_cpu, int nice);
 int cal_priority (int recent_cpu, int nice);
 void recal_recent_cpu (void);
 void recal_priority (void);
+void cal_load_avg(void);
 
 
 #endif /* threads/thread.h */
